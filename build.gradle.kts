@@ -1,6 +1,6 @@
 plugins {
-    id("org.springframework.boot") version "3.3.4"
-    id("io.spring.dependency-management") version "1.1.6"
+    id("org.springframework.boot") version "4.0.3"
+    id("io.spring.dependency-management") version "1.1.7"
     id("com.google.protobuf") version "0.9.6"
     application
 }
@@ -33,10 +33,19 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    implementation("org.springframework.boot:spring-boot-starter-log4j2")
+//    implementation("org.springframework.boot:spring-boot-starter-log4j2")
     implementation("org.postgresql:postgresql:42.7.7")
 
     implementation("com.google.protobuf:protobuf-java:4.33.5")
+
+    implementation("org.springframework.data:spring-data-jpa:4.0.3")
+
+    compileOnly("org.projectlombok:lombok:1.18.42")
+    annotationProcessor("org.projectlombok:lombok:1.18.42")
+
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa:4.0.3")
+
+    implementation("com.google.protobuf:protobuf-java-util:4.33.5")
 }
 
 tasks.withType<ProcessResources> {
@@ -45,7 +54,7 @@ tasks.withType<ProcessResources> {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.sneha.Main"
+    mainClass = "com.sneha.Main"
 }
 
 tasks.test {
