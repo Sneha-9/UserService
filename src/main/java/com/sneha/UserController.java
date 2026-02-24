@@ -23,7 +23,7 @@ public class UserController {
         return UserRegisterResponse.newBuilder().setId(id).build();
     }
 
-    @PostMapping(value = "/user/validation", produces = "application/json")
+    @PostMapping(value = "/user/validation", consumes = "application/json", produces = "application/json")
     UserValidationResponse validateUser(@RequestBody UserValidationRequest userValidationRequest) {
         boolean response = userService.validateUser(userValidationRequest.getId());
 
