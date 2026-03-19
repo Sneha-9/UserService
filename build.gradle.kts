@@ -40,12 +40,19 @@ dependencies {
 
     implementation("org.springframework.data:spring-data-jpa:4.0.3")
 
-    compileOnly("org.projectlombok:lombok:1.18.42")
+    implementation("org.projectlombok:lombok:1.18.42")
     annotationProcessor("org.projectlombok:lombok:1.18.42")
 
     implementation("org.springframework.boot:spring-boot-starter-data-jpa:4.0.3")
-
+    implementation("com.hubspot.jackson:jackson-datatype-protobuf:0.9.18")
     implementation("com.google.protobuf:protobuf-java-util:4.33.5")
+
+    testImplementation("org.testcontainers:junit-jupiter:1.21.4")
+    testImplementation("org.testcontainers:testcontainers:1.21.4")
+    testImplementation("org.testcontainers:postgresql:1.21.4")
+    testImplementation("org.springframework.boot:spring-boot-starter-test:4.0.3")
+    testImplementation("org.springframework.boot:spring-boot-resttestclient:4.0.3")
+
 }
 
 tasks.withType<ProcessResources> {

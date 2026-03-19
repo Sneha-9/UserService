@@ -1,5 +1,6 @@
 package com.sneha;
 
+import com.sneha.exceptions.*;
 import com.sneha.service.UserService;
 import com.sneha.userservice.*;
 import lombok.AllArgsConstructor;
@@ -17,22 +18,23 @@ public class UserController {
     private UserService userService;
 
     @PostMapping(value = "/user/registration", consumes = "application/json", produces = "application/json")
-    UserRegisterResponse registerUser(@RequestBody UserRegisterRequest userRegisterRequest) {
+    UserRegisterResponse registerUser(@RequestBody UserRegisterRequest userRegisterRequest) throws ValidationException, DuplicateUserException, InternalSystemException {
         String id = userService.registerUser(userRegisterRequest.getName(), userRegisterRequest.getEmail());
 
         return UserRegisterResponse.newBuilder().setId(id).build();
     }
 
     @PostMapping(value = "/user/validation", consumes = "application/json", produces = "application/json")
-    UserValidationResponse validateUser(@RequestBody UserValidationRequest userValidationRequest) {
+    UserValidationResponse validateUser(@RequestBody UserValidationRequest userValidationRequest) throws ValidationException, InternalSystemException {
         boolean response = userService.validateUser(userValidationRequest.getId());
 
         return UserValidationResponse.newBuilder().setIsValid(response).build();
     }
 
     @GetMapping(value = "/users", produces = "application/json")
-    GetUsersResponse getAllUsers() {
+    GetUsersResponse getAllUsers() throws InternalSystemException {
         List<User> users = userService.getAllUser();
+
         return GetUsersResponse.newBuilder().addAllUsers(users).build();
     }
 

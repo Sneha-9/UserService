@@ -1,0 +1,7 @@
+CREATE TABLE users(
+    id        VARCHAR(255) PRIMARY KEY,
+    name     VARCHAR(255) NOT NULL,
+    email    VARCHAR(50)  NOT NULL,
+    createdAt TIMESTAMP WITHOUT TIME ZONE       NOT NULL,
+    updatedAt TIMESTAMP WITHOUT TIME ZONE       NOT NULL
+);
