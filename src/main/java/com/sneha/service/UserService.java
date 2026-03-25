@@ -1,5 +1,6 @@
 package com.sneha.service;
 
+import com.sneha.Constants;
 import com.sneha.exceptions.DuplicateUserException;
 import com.sneha.exceptions.InternalSystemException;
 import com.sneha.exceptions.ValidationException;
@@ -7,11 +8,12 @@ import com.sneha.model.UserDao;
 import com.sneha.store.UserRepository;
 import com.sneha.userservice.User;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserService {
@@ -20,11 +22,11 @@ public class UserService {
 
     public String registerUser(String name, String email) throws DuplicateUserException, ValidationException, InternalSystemException {
         if (name == null || name.isEmpty()) {
-            throw new ValidationException("Name is either null or empty");
+            throw new ValidationException(Constants.NAME_VALIDATION_EXCEPTION_MESSAGE);
         }
 
         if (email == null || email.isEmpty()) {
-            throw new ValidationException("Email is either null or empty");
+            throw new ValidationException(Constants.EMAIL_VALIDATION_EXCEPTION_MESSAGE);
         }
 
         boolean userAlreadyPresent;
@@ -32,23 +34,31 @@ public class UserService {
         try {
             userAlreadyPresent = userRepository.findByEmail(email).isPresent();
         } catch (Exception e) {
-            throw new InternalSystemException("Something went wrong , please try again");
+            log.error("Exception in user Service registering user flow while fetching record by email",e);
+            throw new InternalSystemException(Constants.SYSTEM_EXCEPTION_MESSAGE);
         }
 
         if (userAlreadyPresent) {
             throw new DuplicateUserException();
         }
 
-        UserDao updatedDao = userRepository.save(
-                UserDao.builder().name(name).email(email).build()
-        );
+        UserDao updatedDao;
+        try {
+            updatedDao = userRepository.save(
+                    UserDao.builder().name(name).email(email).build()
+            );
+            return updatedDao.getId();
+        }
+        catch (Exception e) {
+            log.error("Exception in user Service registering user flow while inserting the record",e);
+            throw new InternalSystemException(Constants.SYSTEM_EXCEPTION_MESSAGE);
+        }
 
-        return updatedDao.getId();
     }
 
     public boolean validateUser(String id) throws ValidationException, InternalSystemException {
         if (id == null || id.isEmpty()) {
-            throw new ValidationException("Id is either null or empty");
+            throw new ValidationException(Constants.ID_VALIDATION_EXCEPTION_MESSAGE);
         }
 
         try {
@@ -56,7 +66,8 @@ public class UserService {
 
             return resp;
         } catch (Exception e) {
-            throw new InternalSystemException("Something went wrong , please try again");
+            log.error("Exception in user Service registering user flow while fetching record by id",e);
+            throw new InternalSystemException(Constants.SYSTEM_EXCEPTION_MESSAGE);
         }
 
     }
@@ -64,9 +75,16 @@ public class UserService {
 
     public List<User> getAllUser() throws InternalSystemException {
         List<User> users = new ArrayList<>();
+        List<UserDao> fetchedUsers;
+
 
         try {
-            List<UserDao> fetchedUsers = userRepository.findAll();
+            fetchedUsers = userRepository.findAll();
+        }
+        catch (Exception e) {
+            log.error("Exception in user Service get all user user flow while fetching all records",e);
+            throw new InternalSystemException(Constants.SYSTEM_EXCEPTION_MESSAGE);
+        }
 
             for (UserDao userDao : fetchedUsers) {
                 users.add(
@@ -74,14 +92,10 @@ public class UserService {
                                 .setId(userDao.getId())
                                 .setEmail(userDao.getEmail())
                                 .setName(userDao.getName())
-                                .build()
-                );
+                                .build());
             }
-
             return users;
-        } catch (Exception e) {
-            throw new InternalSystemException("Something went wrong , please try again");
         }
     }
 
-}
+

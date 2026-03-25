@@ -1,5 +1,6 @@
 package com.sneha.service;
 
+import com.sneha.TestConstant;
 import com.sneha.exceptions.DuplicateUserException;
 import com.sneha.exceptions.InternalSystemException;
 import com.sneha.exceptions.ValidationException;
@@ -8,122 +9,113 @@ import com.sneha.store.UserRepository;
 import com.sneha.userservice.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 class UserServiceTest {
+
     UserRepository userRepository = mock(UserRepository.class);
 
-    @Test
-    void returnExceptionWhenEmailIsEmpty() {
-        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).registerUser("sneha", ""));
+    private static Stream<Arguments> inputData() {
+        return Stream.of(
+                Arguments.of(TestConstant.name, ""),
+                Arguments.of(TestConstant.name, null),
+                Arguments.of(null, TestConstant.email),
+                Arguments.of("", TestConstant.email)
+        );
     }
-    @Test
-    void returnExceptionWhenEmailIsNull() {
-        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).registerUser("sneha", null));
+
+    @ParameterizedTest
+    @MethodSource("inputData")
+    void returnExceptionWhenInputIsInvalid(String name, String email) {
+        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).registerUser(name, email));
     }
-    @Test
-    void returnExceptionWhenNameIsNull() {
-        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).registerUser(null, "abc@gmail.com"));
-    }
-    @Test
-    void returnExceptionWhenNameIsEmpty() {
-        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).registerUser("", "abc@gmail.com"));
-    }
+
 
     @Test
     void returnDuplicateUserException(){
         Optional mockedOptional = mock(Optional.class);
 
-        when(userRepository.findByEmail("abc@gmail.com")).thenReturn(mockedOptional);
+        when(userRepository.findByEmail(TestConstant.email)).thenReturn(mockedOptional);
 
         when(mockedOptional.isPresent()).thenReturn(true);
 
-        Assertions.assertThrows(DuplicateUserException.class,()-> new UserService(userRepository).registerUser("sneha", "abc@gmail.com"));
+        Assertions.assertThrows(DuplicateUserException.class,()-> new UserService(userRepository).registerUser(TestConstant.name, TestConstant.email));
     }
 
 
     @Test
     void registerUserReturnsId() throws ValidationException, DuplicateUserException, InternalSystemException {
-        String name = "sneha";
-        String email = "abc@gmail.com";
-        String id = "123";
-
         Optional mockedOptional = mock(Optional.class);
 
-        when(userRepository.findByEmail("abc@gmail.com")).thenReturn(mockedOptional);
+        when(userRepository.findByEmail(TestConstant.email)).thenReturn(mockedOptional);
 
         when(mockedOptional.isPresent()).thenReturn(false);
 
         UserDao requestDao = UserDao.builder()
-                .email(email)
-                .name(name)
+                .email(TestConstant.email)
+                .name(TestConstant.name)
                 .build();
 
         UserDao responseDao = UserDao.builder()
-                .id(id)
-                .email(email)
-                .name(name)
+                .id(TestConstant.id)
+                .email(TestConstant.email)
+                .name(TestConstant.name)
                 .build();
 
         when(userRepository.save(requestDao)).thenReturn(responseDao);
 
-        String newUserId = new UserService(userRepository).registerUser("sneha","abc@gmail.com");
+        String newUserId = new UserService(userRepository).registerUser(TestConstant.name,TestConstant.email);
 
-        Assertions.assertEquals("123", newUserId);
+        Assertions.assertEquals(TestConstant.id, newUserId);
 
     }
 
     @Test
     void returnExceptionWhenDataBaseConnectionFailsWhileRegisteringUser(){
 
-        when(userRepository.findByEmail("abc@gmail.com")).thenThrow();
+        when(userRepository.findByEmail(TestConstant.email)).thenThrow();
 
-        Assertions.assertThrows(Exception.class,()-> new UserService(userRepository).registerUser("sneha","abc"));
+        Assertions.assertThrows(Exception.class,()-> new UserService(userRepository).registerUser(TestConstant.name,TestConstant.email));
     }
 
-    @Test
-    void returnExceptionWhenIdIsNull(){
-        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).validateUser(null));
-    }
-    @Test
-    void returnExceptionWhenIdIsEmpty(){
-        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).validateUser(""));
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = {""})
+    void returnExceptionWhenIdIsInvalid(String input){
+        Assertions.assertThrows(ValidationException.class,()-> new UserService(userRepository).validateUser(input));
     }
 
 
-    @Test
-    void returnFalseWhenUserIsInvalid() throws ValidationException, InternalSystemException {
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void returnBooleanOnUserValidation(boolean input) throws ValidationException, InternalSystemException {
         Optional mockedOptional = mock(Optional.class);
 
-        when(userRepository.findById("123")).thenReturn(mockedOptional);
+        when(userRepository.findById(TestConstant.id)).thenReturn(mockedOptional);
 
-        when(mockedOptional.isPresent()).thenReturn(false);
+        when(mockedOptional.isPresent()).thenReturn(input);
 
-        Assertions.assertEquals(false, new UserService(userRepository).validateUser("123"));
+        Assertions.assertEquals(input, new UserService(userRepository).validateUser(TestConstant.id));
     }
 
-    @Test
-    void returnTrueWhenUserIsValid() throws ValidationException, InternalSystemException {
-        Optional mockedOptional = mock(Optional.class);
-
-        when(userRepository.findById("123")).thenReturn(mockedOptional);
-
-        when(mockedOptional.isPresent()).thenReturn(true);
-
-        Assertions.assertEquals(true, new UserService(userRepository).validateUser("123"));
-    }
 
     @Test
     void returnExceptionWhenDataBaseConnectionFailsWhileValidatingUser() {
-        when(userRepository.findById("123")).thenThrow();
+        when(userRepository.findById(TestConstant.id)).thenThrow();
 
-        Assertions.assertThrows(Exception.class,()-> new UserService(userRepository).validateUser("123"));
+        Assertions.assertThrows(Exception.class,()-> new UserService(userRepository).validateUser(TestConstant.id));
     }
 
     @Test
@@ -138,9 +130,9 @@ class UserServiceTest {
     @Test
     void returnListOfUsers() throws InternalSystemException {
         UserDao requestDao = UserDao.builder()
-                .email("abc@gmail.com")
-                .name("sneha")
-                .id("123")
+                .email(TestConstant.email)
+                .name(TestConstant.name)
+                .id(TestConstant.id)
                 .build();
 
         List<UserDao> userDaoList = new ArrayList<>();
@@ -149,14 +141,11 @@ class UserServiceTest {
         when(userRepository.findAll()).thenReturn(userDaoList);
 
         List<User> userResponse  = new ArrayList<>();
-        userResponse.add(User.newBuilder().setName("sneha").setEmail("abc@gmail.com").setId("123").build());
+        userResponse.add(User.newBuilder().setName(TestConstant.name).setEmail(TestConstant.email).setId(TestConstant.id).build());
 
         List<User> result =  new UserService(userRepository).getAllUser();
 
         Assertions.assertEquals(userResponse, result);
     }
-
-
-
 
 }

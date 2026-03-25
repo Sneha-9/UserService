@@ -3,7 +3,8 @@ package com.sneha;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
+//TODO: REMOVE USELESS COMMENT-done
+
 @SpringBootApplication
 public class Main {
 

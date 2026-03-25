@@ -1,5 +1,6 @@
 package com.sneha.model;
 
+import com.sneha.Constants;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -10,10 +11,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
-@Table(name = "users")
+
+@Table(name = Constants.USER_DAO_TABLE_NAME)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -29,11 +30,13 @@ public class UserDao {
     private String id;
 
     @CreationTimestamp
-    @Column(name = "createdat", updatable = false)
+
+    @Column(name = Constants.USER_DAO_COLUMN_NAME_CREATED_AT, updatable = false)
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updatedat")
+
+    @Column(name = Constants.USER_DAO_COLUMN_NAME_UPDATED_AT)
     private LocalDateTime updatedAt;
 
 }

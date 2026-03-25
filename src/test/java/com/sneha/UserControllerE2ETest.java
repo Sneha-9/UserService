@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sneha.errorservice.ErrorResponse;
 import com.sneha.userservice.*;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureRestTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.client.RestTestClient;
@@ -24,6 +26,9 @@ import java.util.List;
 @AutoConfigureRestTestClient
 public class UserControllerE2ETest {
 
+    //TODO: CONSIDER USING TEST CONSTANT OF BUILDER
+
+
     @Container
     static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:18")
             .withDatabaseName("userservice")
@@ -34,6 +39,8 @@ public class UserControllerE2ETest {
     @Autowired
     private RestTestClient restTestClient;
 
+
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry) {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
@@ -41,16 +48,23 @@ public class UserControllerE2ETest {
         registry.add("spring.datasource.password", postgres::getPassword);
     }
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    @BeforeEach
+    void cleanDB(){
+       jdbcTemplate.execute("TRUNCATE Table users");
+    }
+
     @Test
     void shouldRegisterANewUser() {
 
         UserRegisterRequest registerRequest = UserRegisterRequest.newBuilder()
-                .setName("testName")
-                .setEmail("test@name.com")
+                .setName(TestConstant.name)
+                .setEmail(TestConstant.email)
                 .build();
 
         RestTestClient.ResponseSpec responseSpec = restTestClient.post()
-                .uri("/user/registration")
+                .uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(registerRequest)
                 .exchange();
@@ -70,11 +84,11 @@ public class UserControllerE2ETest {
 
         UserRegisterRequest registerRequest = UserRegisterRequest.newBuilder()
                 .setName("")
-                .setEmail("test@name.com")
+                .setEmail(TestConstant.email)
                 .build();
 
         RestTestClient.ResponseSpec responseSpec = restTestClient.post()
-                .uri("/user/registration")
+                .uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(registerRequest)
                 .exchange();
@@ -86,7 +100,7 @@ public class UserControllerE2ETest {
                 .getResponseBody();
 
         Assertions.assertNotNull(errorResponse);
-        Assertions.assertEquals("Name is either null or empty", errorResponse.getMessage());
+        Assertions.assertEquals(Constants.NAME_VALIDATION_EXCEPTION_MESSAGE, errorResponse.getMessage());
 
     }
 
@@ -94,12 +108,12 @@ public class UserControllerE2ETest {
     void shouldReturnErrorWhenUserAlreadyExists() {
 
         UserRegisterRequest registerRequest = UserRegisterRequest.newBuilder()
-                .setName("test")
-                .setEmail("test@name.com")
+                .setName(TestConstant.name)
+                .setEmail(TestConstant.email)
                 .build();
 
         RestTestClient.ResponseSpec responseSpec = restTestClient.post()
-                .uri("/user/registration")
+                .uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(registerRequest)
                 .exchange();
@@ -107,7 +121,7 @@ public class UserControllerE2ETest {
         responseSpec.expectStatus().isOk();
 
         responseSpec = restTestClient.post()
-                .uri("/user/registration")
+                .uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(registerRequest)
                 .exchange();
@@ -119,15 +133,15 @@ public class UserControllerE2ETest {
                 .getResponseBody();
 
         Assertions.assertNotNull(errorResponse);
-        Assertions.assertEquals("User with provided emailId already exists", errorResponse.getMessage());
+        Assertions.assertEquals(Constants.DUPLICATE_USER_EXCEPTION_MESSAGE, errorResponse.getMessage());
 
     }
 
     @Test
     void shouldReturnErrorWhenEmailIsInvalid(){
-        UserRegisterRequest userRegisterRequest = UserRegisterRequest.newBuilder().setEmail("").setName("sneha").build();
+        UserRegisterRequest userRegisterRequest = UserRegisterRequest.newBuilder().setEmail("").setName(TestConstant.name).build();
 
-        RestTestClient.ResponseSpec responseSpec=  restTestClient.post().uri("/user/registration")
+        RestTestClient.ResponseSpec responseSpec=  restTestClient.post().uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userRegisterRequest).exchange();
 
@@ -135,19 +149,19 @@ public class UserControllerE2ETest {
 
         ErrorResponse errorResponse = responseSpec.expectBody(ErrorResponse.class).returnResult().getResponseBody();
 
-        Assertions.assertEquals("Email is either null or empty",errorResponse.getMessage());
+        Assertions.assertEquals(Constants.EMAIL_VALIDATION_EXCEPTION_MESSAGE,errorResponse.getMessage());
     }
 
     @Test
     void shouldValidateUserAsTrue(){
 
         UserRegisterRequest registerRequest = UserRegisterRequest.newBuilder()
-                .setName("test")
-                .setEmail("test@name.com")
+                .setName(TestConstant.name)
+                .setEmail(TestConstant.email)
                 .build();
 
         RestTestClient.ResponseSpec responseSpec = restTestClient.post()
-                .uri("/user/registration")
+                .uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(registerRequest)
                 .exchange();
@@ -160,7 +174,7 @@ public class UserControllerE2ETest {
 
 
         RestTestClient.ResponseSpec validateresponseSpec = restTestClient.post()
-                .uri("/user/validation")
+                .uri(Constants.VALIDATE_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userValidationRequest)
                 .exchange();
@@ -179,12 +193,12 @@ public class UserControllerE2ETest {
     void shouldValidateUserAsFalse(){
 
         UserRegisterRequest registerRequest = UserRegisterRequest.newBuilder()
-                .setName("test")
-                .setEmail("test@name.com")
+                .setName(TestConstant.name)
+                .setEmail(TestConstant.email)
                 .build();
 
         RestTestClient.ResponseSpec responseSpec = restTestClient.post()
-                .uri("/user/registration")
+                .uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(registerRequest)
                 .exchange();
@@ -193,11 +207,11 @@ public class UserControllerE2ETest {
                 .returnResult()
                 .getResponseBody();
 
-        UserValidationRequest userValidationRequest = UserValidationRequest.newBuilder().setId("123").build();
+        UserValidationRequest userValidationRequest = UserValidationRequest.newBuilder().setId(TestConstant.id).build();
 
 
         RestTestClient.ResponseSpec validateresponseSpec = restTestClient.post()
-                .uri("/user/validation")
+                .uri(Constants.VALIDATE_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userValidationRequest)
                 .exchange();
@@ -216,7 +230,7 @@ public class UserControllerE2ETest {
         UserValidationRequest userValidationRequest = UserValidationRequest.newBuilder().setId("").build();
 
         RestTestClient.ResponseSpec validateresponseSpec = restTestClient.post()
-                .uri("/user/validation")
+                .uri(Constants.VALIDATE_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(userValidationRequest)
                 .exchange();
@@ -224,20 +238,20 @@ public class UserControllerE2ETest {
 
         ErrorResponse errorResponse = validateresponseSpec.expectBody(ErrorResponse.class).returnResult().getResponseBody();
 
-        Assertions.assertEquals("Id is either null or empty",errorResponse.getMessage());
+        Assertions.assertEquals(Constants.ID_VALIDATION_EXCEPTION_MESSAGE,errorResponse.getMessage());
     }
 
     @Test
     void shouldListAllUsers(){
         //Register User Request
         UserRegisterRequest registerRequest = UserRegisterRequest.newBuilder()
-                .setName("test")
-                .setEmail("test@name.com")
+                .setName(TestConstant.name)
+                .setEmail(TestConstant.email)
                 .build();
 
         //Make A call to register user
         RestTestClient.ResponseSpec responseSpec = restTestClient.post()
-                .uri("/user/registration")
+                .uri(Constants.REGISTER_USER_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(registerRequest)
                 .exchange();
@@ -247,12 +261,14 @@ public class UserControllerE2ETest {
                 .returnResult()
                 .getResponseBody();
         //Build Expected User List
+
         List<User> expected= new ArrayList<>();
+
         expected.add(User.newBuilder().setName(registerRequest.getName()).setEmail(registerRequest.getEmail())
                 .setId(registerResponse.getId()).build());
         //Make A Call To Get Users
         RestTestClient.ResponseSpec listUsersResponseSpec = restTestClient.get()
-                .uri("/users")
+                .uri(Constants.GET_USERS_PATH)
                 .exchange();
 
         responseSpec.expectStatus().isOk();
@@ -262,9 +278,6 @@ public class UserControllerE2ETest {
                 .getResponseBody();
 
         Assertions.assertEquals(expected,getUsersResponse.getUsersList());
-
     }
-
-
 
 }

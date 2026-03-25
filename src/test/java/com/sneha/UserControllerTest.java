@@ -17,13 +17,12 @@ class UserControllerTest {
 
     UserService userService = mock(UserService.class);
 
-//    UserRegisterResponse userRegisterResponse = mock(UserRegisterResponse.class);
     @Test
     void registerUserReturnId() throws ValidationException, DuplicateUserException, InternalSystemException {
 
-       UserRegisterRequest userRegisterRequest = UserRegisterRequest.newBuilder().setEmail("abc@gamil.com").setName("sneha").build();
-        UserRegisterResponse userRegisterResponse = UserRegisterResponse.newBuilder().setId("123").build();
-        when(userService.registerUser(userRegisterRequest.getName(),userRegisterRequest.getEmail())).thenReturn("123");
+       UserRegisterRequest userRegisterRequest = UserRegisterRequest.newBuilder().setEmail(TestConstant.email).setName(TestConstant.name).build();
+        UserRegisterResponse userRegisterResponse = UserRegisterResponse.newBuilder().setId(TestConstant.id).build();
+        when(userService.registerUser(userRegisterRequest.getName(),userRegisterRequest.getEmail())).thenReturn(TestConstant.id);
 
         Assertions.assertEquals(userRegisterResponse,new UserController(userService).registerUser(userRegisterRequest) );
     }
@@ -36,6 +35,7 @@ class UserControllerTest {
 
         Assertions.assertThrows(ValidationException.class,()->new UserController(userService).registerUser(userRegisterRequest) );
     }
+
     @Test
     void returnExceptionWhenUserIdAlreadyExist() throws ValidationException, DuplicateUserException, InternalSystemException {
 
@@ -44,6 +44,7 @@ class UserControllerTest {
 
         Assertions.assertThrows(DuplicateUserException.class,()->new UserController(userService).registerUser(userRegisterRequest) );
     }
+
     @Test
     void returnExceptionWhenInternalSystemIsDown() throws ValidationException, DuplicateUserException, InternalSystemException {
 

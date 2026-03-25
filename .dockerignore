@@ -4,3 +4,4 @@ build/
 Docker-compose.yaml
 Dockerfile
 .DS_Store
+htmlReport
