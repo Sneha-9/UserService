@@ -28,6 +28,7 @@ jobs:
         run: ./gradlew clean test
 
   publish:
+    needs: test
     name: Publish
     runs-on: ubuntu-latest
     permissions:
@@ -55,3 +56,4 @@ jobs:
         uses: docker/build-push-action@v7
         with:
           push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/userservice:latest
