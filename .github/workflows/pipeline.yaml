@@ -1,0 +1,25 @@
+name: Pipeline
+on: [push]
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - name: Setup Gradle
+        run: gradle/actions/setup-gradle@v5
+
+      - name: Build
+        run: ./gradlew clean build
+
+      - name: Test
+        run: ./gradlew clean test
