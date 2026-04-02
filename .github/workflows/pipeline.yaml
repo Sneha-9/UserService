@@ -57,3 +57,4 @@ jobs:
         with:
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/userservice:latest
+          platforms: linux/amd64,linux/arm64
