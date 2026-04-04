@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: app-ingress
+  namespace: userservicenamespace
+spec:
+  rules:
+    - host: userservice.localhost
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: userservice
+                port:
+                  number: 80 # This matches the 'port' from the Service above

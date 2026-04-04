@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: userservice
+  namespace: userservicenamespace
+spec:
+  selector:
+    app: userservice
+  ports:
+    - protocol: TCP
+      port: 80         # Port the service listens on inside the cluster
+      targetPort: 8099 # The port your app runs on inside the pod
+  type: ClusterIP

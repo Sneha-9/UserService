@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: userservice
+  namespace: userservicenamespace
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: userservice
+  template:
+    metadata:
+      labels:
+        app: userservice
+    spec:
+      containers:
+        - name: userservice
+          image: sneha0911/userservice:latest
+          env:
+            - name: DB_HOST
+              value: "userservice-db-h"
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "userservice"
+            - name: DB_USERNAME
+              value: "sneha"
+            - name: DB_PASSWORD
+              value: "password"
+          ports:
+            - containerPort: 8099
