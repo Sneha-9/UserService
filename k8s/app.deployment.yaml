@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: userservice
-  namespace: userservicenamespace
 spec:
   replicas: 3
   selector:
