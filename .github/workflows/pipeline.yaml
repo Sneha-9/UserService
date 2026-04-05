@@ -102,3 +102,5 @@ jobs:
           kubectl apply -f k8s/app.service.yaml
           
           kubectl apply -f k8s/app.ingress.yaml
+          
+          kubectl apply -f k8s/app.middleware.yaml
