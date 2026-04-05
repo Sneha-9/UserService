@@ -1,16 +1,23 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: app-ingress
+  name: whoami-ingress
 spec:
   rules:
-    - host: userservice.localhost
+    - host: pabq.pausescape.com
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
+                name: whoami-service
+                port:
+                  number: 80
+          - path: /userservice
+            pathType: Prefix
+            backend:
+              service:
                 name: userservice
                 port:
-                  number: 80 # This matches the 'port' from the Service above
+                  number: 80

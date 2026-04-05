@@ -96,3 +96,9 @@ jobs:
           kubectl apply -f k8s/database.pod.yaml
           
           kubectl rollout status statefulset/userservice-db --timeout=90s
+          
+          kubectl apply -f k8s/app.deployment.yaml
+          
+          kubectl apply -f k8s/app.service.yaml
+          
+          kubectl apply -f k8s/app.ingress.yaml
