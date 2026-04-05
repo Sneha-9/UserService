@@ -2,6 +2,8 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: whoami-ingress
+  annotations:
+    traefik.ingress.kubernetes.io/router.middlewares: default-strip-prefix@kubernetescrd
 spec:
   rules:
     - host: pabq.pausescape.com
@@ -19,5 +21,19 @@ spec:
             backend:
               service:
                 name: userservice
+                port:
+                  number: 80
+          - path: /pointservice
+            pathType: Prefix
+            backend:
+              service:
+                name: pointservice-svc
+                port:
+                  number: 80
+          - path: /rankingservice
+            pathType: Prefix
+            backend:
+              service:
+                name: rankingservice-svc
                 port:
                   number: 80
