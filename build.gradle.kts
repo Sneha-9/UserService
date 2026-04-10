@@ -52,6 +52,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test:4.0.3")
     testImplementation("org.springframework.boot:spring-boot-resttestclient:4.0.3")
 
+    implementation ("org.springframework.boot:spring-boot-starter-actuator")
+    implementation ("io.micrometer:micrometer-registry-prometheus")
+    //implementation ("io.micrometer:micrometer-core")
+
 }
 
 tasks.withType<ProcessResources> {

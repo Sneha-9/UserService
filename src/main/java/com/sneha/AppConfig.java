@@ -1,6 +1,9 @@
 package com.sneha;
 
 import com.hubspot.jackson.datatype.protobuf.ProtobufModule;
+import io.micrometer.core.aop.CountedAspect;
+import io.micrometer.core.aop.TimedAspect;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.protobuf.ProtobufJsonFormatHttpMessageConverter;
@@ -25,5 +28,13 @@ public class AppConfig {
                 .propertyNamingStrategy(PropertyNamingStrategies.LOWER_CAMEL_CASE)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .build();
+    }
+    @Bean
+    public TimedAspect timedAspect(MeterRegistry registry) {
+        return new TimedAspect(registry);
+    }
+    @Bean
+    CountedAspect countedAspect(MeterRegistry registry) {
+        return new CountedAspect(registry);
     }
 }

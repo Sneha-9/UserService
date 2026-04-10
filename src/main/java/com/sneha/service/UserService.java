@@ -7,6 +7,7 @@ import com.sneha.exceptions.ValidationException;
 import com.sneha.model.UserDao;
 import com.sneha.store.UserRepository;
 import com.sneha.userservice.User;
+import io.micrometer.core.instrument.Counter;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
+
 public class UserService {
 
     private UserRepository userRepository;

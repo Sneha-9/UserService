@@ -1,0 +1,6 @@
+scrape_configs:
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 15s # This can be adjusted based on our needs
+    static_configs:
+      - targets: ['user-service-prometheus:8099','host.docker.internal:8099']
